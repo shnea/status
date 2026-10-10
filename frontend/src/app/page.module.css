@@ -1,0 +1,79 @@
+.page {
+  max-width: 1440px;
+  min-height: 100vh;
+  margin: auto;
+  padding: 32px 5vw 64px;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #191919;
+  padding-bottom: 24px;
+}
+.brand {
+  max-width: 60%;
+  overflow-wrap: anywhere;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.08em;
+}
+.hero {
+  padding: clamp(80px, 12vw, 180px) 0 64px;
+}
+.title {
+  font-size: clamp(68px, 11vw, 164px);
+  line-height: 0.98;
+  letter-spacing: -0.08em;
+  font-weight: 800;
+  margin: 24px 0 48px;
+  max-width: 1000px;
+}
+.line {
+  display: block;
+}
+.bottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 32px;
+  border-top: 1px solid #191919;
+  padding-top: 32px;
+}
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 64px;
+  background: #191919;
+  color: white;
+  padding: 18px 24px;
+  min-width: 220px;
+}
+.sampleLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 0;
+  font-weight: 600;
+}
+.sampleLink:hover {
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+@media (max-width: 640px) {
+  .title {
+    font-size: 70px;
+  }
+  .hero {
+    padding-top: 80px;
+  }
+}
+
+.announcement {
+  padding: 18px 0;
+  border-bottom: 1px solid #d1d0c8;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+}

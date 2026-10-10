@@ -1,0 +1,20 @@
+# 모든 평문 환경변수 제외
+.env
+.env.*
+
+# 공개 명세와 SOPS 암호화 원본만 예외
+!.env.example
+!*.sops.env
+
+# 키와 복호화 중간 파일
+.env.keys
+*.agekey
+.runtime/
+node_modules/
+.next/
+.gradle/
+build/
+playwright-report/
+test-results/
+*.tsbuildinfo
+.idea/

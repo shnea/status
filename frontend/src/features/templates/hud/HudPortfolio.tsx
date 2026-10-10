@@ -1,0 +1,439 @@
+"use client";
+
+import { Fragment, useState } from "react";
+import type { Contact, Project, Skill } from "@/features/portfolio/model";
+import { contactHref, initials, sortedSkills } from "@/features/portfolio/model";
+import type { TemplateProps } from "@/features/templates/model";
+import { portfolioSections, profileExcerpt, sectionNames } from "@/features/templates/model";
+import { useProjectNavigation } from "@/features/templates/useProjectNavigation";
+import { BasicIcon, IconAsset } from "@/features/catalog/IconAsset";
+import { hasContent, RichContent } from "@/features/content/RichContent";
+import { useSiteSettings } from "@/features/site/SiteContext";
+import { AiChat } from "@/features/ai/AiChat";
+import styles from "./HudPortfolio.module.css";
+
+function OrbitGraphic() {
+  return (
+    <svg className={styles.orbit} viewBox="0 0 600 440" aria-hidden focusable="false">
+      <defs>
+        <radialGradient id="hud-sphere" cx="30%" cy="24%" r="75%">
+          <stop stopColor="#204755" />
+          <stop offset="0.6" stopColor="#0d2530" />
+          <stop offset="1" stopColor="#071119" />
+        </radialGradient>
+      </defs>
+      <circle cx="330" cy="242" r="186" fill="url(#hud-sphere)" stroke="#416774" />
+      <g fill="none" stroke="#48717e" strokeWidth="0.8" opacity="0.6">
+        <ellipse cx="330" cy="242" rx="186" ry="64" transform="rotate(-24 330 242)" />
+        <ellipse cx="330" cy="242" rx="84" ry="186" transform="rotate(28 330 242)" />
+        <ellipse cx="330" cy="242" rx="142" ry="186" transform="rotate(28 330 242)" />
+        <circle cx="330" cy="242" r="218" strokeDasharray="290 190 100 230" />
+        <path d="M66 242H584M330 14V436M128 80L545 383" />
+      </g>
+      <g fill="#93dce8">
+        <circle cx="224" cy="83" r="3" />
+        <circle cx="516" cy="242" r="3" />
+        <path d="M74 354h12m-6-6v12M524 52h12m-6-6v12" stroke="#93dce8" />
+      </g>
+    </svg>
+  );
+}
+
+function ProjectGraphic({ index }: { index: number }) {
+  return (
+    <svg className={styles.cover} viewBox="0 0 400 260" aria-hidden focusable="false">
+      <rect width="400" height="260" fill="#0b1821" />
+      <g fill="none" stroke="#365c6d" strokeWidth="1.2">
+        {index % 3 === 0 ? (
+          <>
+            <path d="M-30 250L400 28M-30 180L400 -42M-30 320L400 98M0 76L430 210" />
+            <path d="M30 65L180 13L340 103L190 160ZM30 65V182L190 247L340 179V103M190 160V247" />
+          </>
+        ) : index % 3 === 1 ? (
+          <>
+            <path d="M110 208L162 34L304 53L251 224Z" />
+            <path d="M127 195L173 54L284 69L239 204Z" />
+            <path d="M173 54L284 69M164 86L274 102M155 118L264 134M146 151L253 167" />
+          </>
+        ) : (
+          <>
+            <circle cx="200" cy="130" r="85" />
+            <circle cx="200" cy="130" r="57" />
+            <path d="M50 130H350M200 20V240M100 45L300 215M100 215L300 45" />
+          </>
+        )}
+      </g>
+      <g fill="#8ed4e2">
+        <circle cx="200" cy="130" r="3" />
+        <path d="M20 20h18v2H22v16h-2ZM380 240h-18v-2h16v-16h2Z" />
+      </g>
+    </svg>
+  );
+}
+
+function Links({ links }: { links: Contact[] }) {
+  return (
+    <div className={styles.links}>
+      {links
+        .filter((link) => link.visible && link.value)
+        .map((link) => (
+          <a
+            key={link.id}
+            href={contactHref(link)}
+            target={link.type === "web" ? "_blank" : undefined}
+            rel="noopener noreferrer"
+            className={styles.chip}
+          >
+            <BasicIcon name={link.icon} />
+            {link.label || link.value} ↗
+          </a>
+        ))}
+    </div>
+  );
+}
+
+function SkillBadge({ skill }: { skill: Skill }) {
+  return (
+    <span className={styles.skill}>
+      <IconAsset icon={skill.icon} name={skill.name} className={styles.logo} />
+      {skill.name}
+    </span>
+  );
+}
+
+function Skills({ skills }: { skills: Skill[] }) {
+  const [expanded, setExpanded] = useState(false);
+  const shown = sortedSkills(expanded ? skills : skills.filter((skill) => skill.featured));
+
+  return (
+    <>
+      {[...new Set(shown.map((skill) => skill.category))].map((category) => (
+        <div key={category} className={styles.skillGroup}>
+          <h3>{category}</h3>
+          <div className={styles.skills}>
+            {shown
+              .filter((skill) => skill.category === category)
+              .map((skill) => (
+                <SkillBadge key={skill.id} skill={skill} />
+              ))}
+          </div>
+        </div>
+      ))}
+      {skills.some((skill) => !skill.featured) && (
+        <button
+          className={styles.more}
+          aria-expanded={expanded}
+          onClick={() => setExpanded(!expanded)}
+        >
+          {expanded ? "접기 −" : "더보기 +"}
+        </button>
+      )}
+    </>
+  );
+}
+
+function ProjectDetail({
+  project,
+  fileBase,
+  skills,
+  standalone = false,
+}: {
+  project: Project;
+  fileBase: string;
+  skills: Skill[];
+  standalone?: boolean;
+}) {
+  const Heading = standalone ? "h1" : "h2";
+
+  return (
+    <article className={styles.projectDetail}>
+      {project.imageId && (
+        <img
+          className={styles.detailImage}
+          src={fileBase + project.imageId + "/content/preview"}
+          alt=""
+        />
+      )}
+      <Heading>{project.title}</Heading>
+      {project.role && <p className={styles.meta}>{project.role}</p>}
+      {project.summary && <p className={styles.summary}>{project.summary}</p>}
+      <div className={styles.skills}>
+        {skills
+          .filter((skill) => project.skillIds.includes(skill.id))
+          .map((skill) => (
+            <SkillBadge key={skill.id} skill={skill} />
+          ))}
+      </div>
+      <Links links={project.links} />
+      <RichContent content={project.content} fileBase={fileBase} className={styles.body} />
+    </article>
+  );
+}
+
+export function HudPortfolio({
+  document,
+  slug,
+  portfolioId,
+  preview = false,
+  sample = false,
+  initialProject,
+  aiEnabled = false,
+}: TemplateProps) {
+  const site = useSiteSettings();
+  const { selected, modal, close, open } = useProjectNavigation(document.projects, slug, preview);
+  const sections = portfolioSections(document);
+  const excerpt = profileExcerpt(document.profile.about);
+  const hasAbout = hasContent(document.profile.about);
+  const hasProjects = sections.some((section) => section.id === "projects");
+  const fileBase = preview ? "/api/files/" : "/api/public/files/" + portfolioId + "/";
+
+  const about = hasAbout && (
+    <section className={styles.section} id="about" aria-labelledby="about-heading">
+      <h2 className={styles.sectionTitle} id="about-heading">
+        자기소개
+      </h2>
+      <div className={styles.about}>
+        {document.profile.imageId && (
+          <img
+            className={styles.portrait}
+            src={fileBase + document.profile.imageId + "/content/preview"}
+            alt={document.profile.name}
+          />
+        )}
+        <RichContent content={document.profile.about} fileBase={fileBase} className={styles.body} />
+        {document.profile.contacts.some((link) => link.visible && link.value) && (
+          <aside className={styles.contactPanel}>
+            <Links links={document.profile.contacts} />
+          </aside>
+        )}
+      </div>
+    </section>
+  );
+
+  return (
+    <main id="content" tabIndex={-1} className={styles.page} data-template="hud">
+      <div className={styles.container}>
+        {preview && (
+          <div className={styles.preview}>
+            {sample ? "디자인 미리보기 · 예시 데이터" : "비공개 미리보기 · 현재 임시저장본"}
+          </div>
+        )}
+        <header className={styles.header}>
+          <a
+            className={styles.brand}
+            href={sample ? "/design-preview" : preview ? "/dashboard" : "/@" + slug}
+          >
+            <span aria-hidden>{initials(document.profile.name)}</span>
+            {sample
+              ? "템플릿 목록으로 ↗"
+              : preview
+                ? "작성 화면으로 ↗"
+                : document.profile.name || "포트폴리오"}
+          </a>
+          {!initialProject && (
+            <nav aria-label="포트폴리오 섹션" className={styles.nav}>
+              {hasAbout && <a href="#about">자기소개</a>}
+              {sections.map((section) => (
+                <a key={section.id} href={"#" + section.id}>
+                  {sectionNames[section.id]}
+                </a>
+              ))}
+            </nav>
+          )}
+          <a className={styles.service} href="/">
+            {site.serviceName} ↗
+          </a>
+        </header>
+        {initialProject ? (
+          <section className={styles.standalone}>
+            <a className={styles.more} href={"/@" + slug}>
+              ← 포트폴리오
+            </a>
+            <ProjectDetail
+              project={initialProject}
+              fileBase={fileBase}
+              skills={document.skills}
+              standalone
+            />
+          </section>
+        ) : (
+          <>
+            <section className={styles.hero}>
+              <div className={styles.heroText}>
+                <h1>{document.profile.title || document.profile.name || "이름"}</h1>
+                {document.profile.introduction && (
+                  <p className={styles.introduction}>{document.profile.introduction}</p>
+                )}
+                {excerpt && <p className={styles.excerpt}>{excerpt}</p>}
+                <Links links={document.profile.contacts} />
+                {sections[0] && (
+                  <a className={styles.scroll} href={"#" + sections[0].id}>
+                    ↓ {sectionNames[sections[0].id]}
+                  </a>
+                )}
+              </div>
+              <div className={styles.heroArt}>
+                {document.profile.bannerImageId ? (
+                  <img
+                    className={styles.heroBanner}
+                    src={fileBase + document.profile.bannerImageId + "/content/preview"}
+                    alt={document.profile.name + " 간판 이미지"}
+                  />
+                ) : !hasAbout && document.profile.imageId ? (
+                  <img
+                    className={styles.heroPortrait}
+                    src={fileBase + document.profile.imageId + "/content/preview"}
+                    alt={document.profile.name}
+                  />
+                ) : (
+                  <OrbitGraphic />
+                )}
+              </div>
+            </section>
+            {!hasProjects && about}
+            {sections.map((section, index) => (
+              <Fragment key={section.id}>
+                <section className={styles.section} id={section.id}>
+                  <h2 className={styles.sectionTitle}>
+                    <span>{String(index + 1).padStart(2, "0")}</span>
+                    {sectionNames[section.id]}
+                  </h2>
+                  {section.id === "skills" && <Skills skills={document.skills} />}
+                  {section.id === "projects" && (
+                    <div className={styles.projects}>
+                      {document.projects
+                        .filter((project) => project.visible)
+                        .map((project, projectIndex) => (
+                          <article key={project.id} className={styles.project}>
+                            <a
+                              className={styles.projectLink}
+                              href={"/@" + slug + "/projects/" + project.id}
+                              onClick={(event) => open(event, project)}
+                            >
+                              <div className={styles.coverFrame}>
+                                {project.imageId ? (
+                                  <img
+                                    className={styles.cover}
+                                    src={fileBase + project.imageId + "/content/preview"}
+                                    alt=""
+                                    loading="lazy"
+                                  />
+                                ) : (
+                                  <ProjectGraphic index={projectIndex} />
+                                )}
+                              </div>
+                              <h3>{project.title} ↗</h3>
+                              {project.summary && (
+                                <p className={styles.summary}>{project.summary}</p>
+                              )}
+                            </a>
+                            <div className={styles.projectSkills}>
+                              {document.skills
+                                .filter((skill) => project.skillIds.includes(skill.id))
+                                .map((skill) => (
+                                  <span key={skill.id}>{skill.name}</span>
+                                ))}
+                            </div>
+                            <Links links={project.links} />
+                          </article>
+                        ))}
+                    </div>
+                  )}
+                  {section.id === "history" && (
+                    <div className={styles.timeline}>
+                      {document.history
+                        .filter((item) => item.visible)
+                        .map((item) => (
+                          <article className={styles.history} key={item.id}>
+                            <p className={styles.period}>
+                              {item.startMonth} — {item.ongoing ? "진행 중" : item.endMonth}
+                            </p>
+                            <div>
+                              <h3>{item.title}</h3>
+                              <p className={styles.meta}>
+                                {[item.organization, item.role].filter(Boolean).join(" / ")}
+                              </p>
+                            </div>
+                            <div>
+                              {item.summary && <p className={styles.summary}>{item.summary}</p>}
+                              {hasContent(item.content) && (
+                                <details>
+                                  <summary>자세히 +</summary>
+                                  <RichContent
+                                    content={item.content}
+                                    fileBase={fileBase}
+                                    className={styles.body}
+                                  />
+                                </details>
+                              )}
+                            </div>
+                          </article>
+                        ))}
+                    </div>
+                  )}
+                  {section.id === "certifications" && (
+                    <div className={styles.certifications}>
+                      {document.certifications
+                        .filter((item) => item.visible)
+                        .map((item) => (
+                          <article className={styles.certification} key={item.id}>
+                            <BasicIcon name="shield" className={styles.certIcon} />
+                            <div>
+                              <h3>{item.name}</h3>
+                              <p className={styles.meta}>{item.issuer}</p>
+                              <p className={styles.period}>
+                                {item.issuedOn}
+                                {item.expiresOn && " — " + item.expiresOn}
+                                {item.expiresOn &&
+                                  item.expiresOn < new Date().toISOString().slice(0, 10) &&
+                                  " · 만료"}
+                              </p>
+                              {item.credentialIdVisible && item.credentialId && (
+                                <p className={styles.meta}>{item.credentialId}</p>
+                              )}
+                              {item.url && (
+                                <a
+                                  className={styles.more}
+                                  href={item.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  자격 확인 ↗
+                                </a>
+                              )}
+                            </div>
+                          </article>
+                        ))}
+                    </div>
+                  )}
+                </section>
+                {section.id === "projects" && about}
+              </Fragment>
+            ))}
+          </>
+        )}
+        {aiEnabled && !preview && <AiChat slug={slug} portfolioId={portfolioId} theme="hud" />}
+        <footer className={styles.footer}>
+          <span>{document.profile.name}</span>
+          <a href="/">{site.serviceName}</a>
+        </footer>
+      </div>
+      <dialog
+        ref={modal}
+        className={styles.dialog}
+        aria-label="프로젝트 상세"
+        onCancel={(event) => {
+          event.preventDefault();
+          close();
+        }}
+      >
+        <button className={styles.close} onClick={close}>
+          닫기 ×
+        </button>
+        {selected && (
+          <ProjectDetail project={selected} fileBase={fileBase} skills={document.skills} />
+        )}
+      </dialog>
+    </main>
+  );
+}

@@ -1,0 +1,7 @@
+creation_rules:
+  - path_regex: ^\.env\.local\.sops\.env$
+    age: age1smjzrjz0l85wfeutyssymyfyzsz7jq24vfene0cvsulgddcurfes4m3rct
+  - path_regex: ^\.env\.prod\.sops\.env$
+    age: >-
+      age1y6qe2r2u502fn3vfpyy2yyw04aq04s5l7m9kw2l2rtpc7hx80cssa8hxxx,
+      age10edf3hdqhlx03ardq4792zctsmavmj7yc7q08348c8qsag03q9kse9zx7q

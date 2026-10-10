@@ -1,0 +1,13 @@
+# 수신자 구조 예시. 자리표시자를 실제 공개키로 교체한다.
+# 개인키와 실제 개인키 경로는 이 파일에 넣지 않는다.
+creation_rules:
+  - path_regex: ^\.env\.local\.sops\.env$
+    age: REPLACE_WITH_LOCAL_AGE_PUBLIC_KEY
+  - path_regex: ^\.env\.dev\.sops\.env$
+    age: REPLACE_WITH_DEV_AGE_PUBLIC_KEY
+  - path_regex: ^\.env\.prod\.sops\.env$
+    age: >-
+      REPLACE_WITH_ADMIN_AGE_PUBLIC_KEY,
+      REPLACE_WITH_PROD_SERVER_AGE_PUBLIC_KEY
+# 서버 SOPS 방식이면 서버 수신자를 포함한다.
+# plain 방식이며 서버가 SOPS 처리를 하지 않으면 서버 수신자는 생략 가능하다.

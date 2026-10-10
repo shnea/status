@@ -1,0 +1,39 @@
+{
+  "name": "status-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --hostname 0.0.0.0",
+    "build": "next build",
+    "start": "next start --hostname 0.0.0.0",
+    "lint": "oxlint --deny-warnings",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write src tests examples scripts next.config.ts playwright.config.ts tsconfig.json package.json .oxlintrc.json",
+    "format:check": "prettier --check src tests examples scripts next.config.ts playwright.config.ts tsconfig.json package.json .oxlintrc.json",
+    "test": "playwright test",
+    "demo:anti-slop": "node examples/anti-slop.ts"
+  },
+  "dependencies": {
+    "@shnea/editor": "file:vendor/shnea-editor-0.1.0-alpha.12.tgz",
+    "hls.js": "1.7.3",
+    "lucide-react": "1.55.0",
+    "next": "16.4.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-markdown": "10.1.0",
+    "remark-gfm": "4.0.1",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@oxlint/plugins": "1.87.0",
+    "@playwright/test": "1.64.0",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "oxlint": "1.87.0",
+    "prettier": "3.9.9",
+    "simple-icons": "16.34.0",
+    "typescript": "7.0.2"
+  },
+  "type": "module"
+}

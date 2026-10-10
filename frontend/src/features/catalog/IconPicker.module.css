@@ -1,0 +1,83 @@
+.trigger,
+.option {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #aaa9a3;
+  background: transparent;
+  color: #191919;
+  padding: 10px 12px;
+  text-align: left;
+}
+.option[aria-pressed="true"] {
+  border-color: #b34224;
+  background: #eee8dd;
+}
+.glyph {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  object-fit: contain;
+  display: inline-grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+.dialog {
+  width: min(720px, calc(100vw - 32px));
+  max-height: calc(100dvh - 48px);
+  overflow: auto;
+  padding: 28px;
+  background: #f6f5f0;
+  border: 1px solid #191919;
+  color: #191919;
+}
+.dialog::backdrop {
+  background: #19191988;
+}
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+.header h3 {
+  font-size: 28px;
+  margin: 0;
+}
+.header button {
+  background: transparent;
+  border: 0;
+  padding: 8px;
+}
+.grid,
+.results {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.results {
+  margin: 12px 0;
+  max-height: 320px;
+  overflow: auto;
+}
+.option {
+  overflow-wrap: anywhere;
+}
+.input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #aaa9a3;
+  background: transparent;
+  color: #191919;
+}
+@media (max-width: 600px) {
+  .grid,
+  .results {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .dialog {
+    padding: 20px;
+  }
+}

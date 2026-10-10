@@ -1,0 +1,44 @@
+.field {
+  margin: 24px 0;
+}
+.field h3 {
+  font-size: 14px;
+  font-weight: 400;
+  margin: 0 0 8px;
+}
+.dropArea {
+  border: 1px dashed #aaa9a3;
+  padding: 20px;
+}
+.dropArea img {
+  display: block;
+  max-height: 220px;
+  object-fit: contain;
+  margin-bottom: 20px;
+}
+.actions {
+  display: flex;
+  gap: 16px;
+}
+.actions button,
+.dropArea > button {
+  border: 1px solid #191919;
+  background: transparent;
+  padding: 8px 12px;
+  color: #191919;
+}
+.hint {
+  color: #656565;
+  font-size: 12px;
+  margin: 12px 0 0;
+}
+.hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.dropArea p[role="alert"] {
+  color: #9e2811;
+}
