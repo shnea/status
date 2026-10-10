@@ -71,6 +71,24 @@ try {
   assert.equal((await fetch("http://127.0.0.1:4002/print/" + jobId)).status, 404);
   for (const template of ["swiss", "hud", "google-flat", "modern-flat", "premium-dark"]) {
     view.document.template = template;
+    const about = view.document.sections.find((section) => section.id === "about");
+    const remaining = view.document.sections.filter((section) => section.id !== "about");
+    const inspector = await chromium.launch();
+    try {
+      const page = await inspector.newPage({ extraHTTPHeaders: { Authorization: "Bearer " + token } });
+      const inspectOrder = async (expected) => {
+        await page.goto("http://127.0.0.1:4002/print/" + jobId);
+        assert.deepEqual(await page.locator("[data-print-section]").evaluateAll((sections) => sections.map((section) => section.dataset.printSection)), expected);
+      };
+      view.document.sections = [about, ...remaining];
+      await inspectOrder(["about", "skills", "projects", "history", "certifications"]);
+      view.document.sections = [...remaining, about];
+      await inspectOrder(["skills", "projects", "history", "certifications", "about"]);
+      about.visible = false;
+      await inspectOrder(["skills", "projects", "history", "certifications"]);
+      assert.equal(await page.getByText("자기소개 마지막 문단", { exact: true }).count(), 0);
+      about.visible = true;
+    } finally { await inspector.close(); }
     imageReads = 0;
     bannerReads = 0;
     const response = await fetch("http://127.0.0.1:3001/render", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ jobId, token }) });

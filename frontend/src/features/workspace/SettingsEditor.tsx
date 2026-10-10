@@ -4,12 +4,14 @@ import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { api } from "@/lib/api";
 import type { PortfolioDocument } from "@/features/portfolio/model";
+import { orderedSections } from "@/features/portfolio/model";
 import type { DesignSetting } from "@/features/templates/model";
 import { samplePaths } from "@/features/templates/model";
 import { OrderedItems, moveItem } from "./OrderedItems";
 import styles from "./Workspace.module.css";
 
 const names = {
+  about: "자기소개",
   skills: "스킬",
   projects: "프로젝트",
   history: "히스토리",
@@ -52,7 +54,7 @@ export function SettingsEditor({
       <h2 className={styles.sectionTitle}>설정</h2>
       <h3 className={styles.fieldTitle}>섹션 순서 · 표시</h3>
       <OrderedItems
-        items={document.sections.map((section) => ({
+        items={orderedSections(document).map((section) => ({
           id: section.id,
           title: names[section.id],
           visible: section.visible,
@@ -61,13 +63,16 @@ export function SettingsEditor({
         visibility={(id, visible) =>
           change((current) => ({
             ...current,
-            sections: current.sections.map((section) =>
+            sections: orderedSections(current).map((section) =>
               section.id === id ? { ...section, visible } : section,
             ),
           }))
         }
         move={(from, to) =>
-          change((current) => ({ ...current, sections: moveItem(current.sections, from, to) }))
+          change((current) => ({
+            ...current,
+            sections: moveItem(orderedSections(current), from, to),
+          }))
         }
       />
       <section className={styles.editorSection}>

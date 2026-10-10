@@ -1,5 +1,7 @@
 import type { JSONContent } from "@tiptap/core";
 import type { PortfolioDocument, Project } from "@/features/portfolio/model";
+import { orderedSections } from "@/features/portfolio/model";
+import { hasContent } from "@/features/content/RichContent";
 
 export interface DesignSetting {
   id: string;
@@ -20,6 +22,7 @@ export interface TemplateProps {
 }
 
 export const sectionNames = {
+  about: "자기소개",
   skills: "스킬",
   projects: "프로젝트",
   history: "히스토리",
@@ -27,10 +30,12 @@ export const sectionNames = {
 };
 
 export function portfolioSections(document: PortfolioDocument) {
-  return document.sections.filter((section) => {
+  return orderedSections(document).filter((section) => {
     if (!section.visible) return false;
 
     switch (section.id) {
+      case "about":
+        return hasContent(document.profile.about);
       case "skills":
         return document.skills.length > 0;
       case "projects":

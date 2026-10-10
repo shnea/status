@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import type { Contact, Project, Skill } from "@/features/portfolio/model";
 import { contactHref, sortedSkills } from "@/features/portfolio/model";
 import type { TemplateProps } from "@/features/templates/model";
@@ -163,10 +163,9 @@ export function SwissPortfolio({
 
   const names = sectionNames;
   const visibleSections = portfolioSections(document);
-  const excerpt = profileExcerpt(document.profile.about);
 
-  const hasAbout = hasContent(document.profile.about);
-  const hasProjects = visibleSections.some((section) => section.id === "projects");
+  const hasAbout = visibleSections.some((section) => section.id === "about");
+  const excerpt = hasAbout ? profileExcerpt(document.profile.about) : "";
 
   const portrait = document.profile.imageId ? (
     <img
@@ -177,8 +176,14 @@ export function SwissPortfolio({
   ) : null;
 
   const about = hasAbout && (
-    <section className={styles.about} id="about" aria-labelledby="about-heading">
+    <section className={styles.about} key="about" id="about" aria-labelledby="about-heading">
       <h2 className={styles.sectionHeading} id="about-heading">
+        <span aria-hidden className={styles.index}>
+          {String(visibleSections.findIndex((section) => section.id === "about") + 1).padStart(
+            2,
+            "0",
+          )}
+        </span>
         자기소개
       </h2>
       <div className={document.profile.imageId ? styles.aboutContent : styles.aboutText}>
@@ -208,7 +213,6 @@ export function SwissPortfolio({
         </a>
         {!initialProject && (
           <nav className={styles.sectionNav} aria-label="포트폴리오 섹션">
-            {hasContent(document.profile.about) && <a href="#about">자기소개</a>}
             {visibleSections.map((section) => (
               <a key={section.id} href={"#" + section.id}>
                 {names[section.id]}
@@ -252,10 +256,13 @@ export function SwissPortfolio({
               )}
             </div>
           </section>
-          {!hasProjects && about}
-          {visibleSections.map((section, index) => (
-            <Fragment key={section.id}>
+
+          {visibleSections.map((section, index) =>
+            section.id === "about" ? (
+              about
+            ) : (
               <section
+                key={section.id}
                 className={section.id === "projects" ? styles.projectSection : styles.section}
                 id={section.id}
               >
@@ -354,9 +361,8 @@ export function SwissPortfolio({
                       ))}
                 </div>
               </section>
-              {section.id === "projects" && about}
-            </Fragment>
-          ))}
+            ),
+          )}
         </>
       )}
       {aiEnabled && !preview && <AiChat slug={slug} portfolioId={portfolioId} theme="swiss" />}

@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import type { Contact, Project, Skill } from "@/features/portfolio/model";
 import { contactHref, initials, sortedSkills } from "@/features/portfolio/model";
 import type { TemplateProps } from "@/features/templates/model";
@@ -161,14 +161,16 @@ export function PremiumDarkPortfolio({
   const site = useSiteSettings();
   const { selected, modal, close, open } = useProjectNavigation(document.projects, slug, preview);
   const sections = portfolioSections(document);
-  const excerpt = profileExcerpt(document.profile.about);
-  const hasAbout = hasContent(document.profile.about);
-  const hasProjects = sections.some((section) => section.id === "projects");
+  const hasAbout = sections.some((section) => section.id === "about");
+  const excerpt = hasAbout ? profileExcerpt(document.profile.about) : "";
   const fileBase = preview ? "/api/files/" : "/api/public/files/" + portfolioId + "/";
 
   const about = hasAbout && (
-    <section className={styles.aboutSection} id="about" aria-labelledby="about-heading">
+    <section className={styles.aboutSection} key="about" id="about" aria-labelledby="about-heading">
       <h2 className={styles.sectionTitle} id="about-heading">
+        <span aria-hidden>
+          {String(sections.findIndex((section) => section.id === "about") + 1).padStart(2, "0")}
+        </span>
         자기소개
       </h2>
       <div className={styles.about}>
@@ -211,7 +213,6 @@ export function PremiumDarkPortfolio({
           </a>
           {!initialProject && (
             <nav aria-label="포트폴리오 섹션" className={styles.nav}>
-              {hasAbout && <a href="#about">자기소개</a>}
               {sections.map((section) => (
                 <a key={section.id} href={"#" + section.id}>
                   {sectionNames[section.id]}
@@ -270,10 +271,16 @@ export function PremiumDarkPortfolio({
               </div>
             </section>
             <div className={styles.sections}>
-              {!hasProjects && about}
-              {sections.map((section, index) => (
-                <Fragment key={section.id}>
-                  <section className={styles.section} id={section.id} data-section={section.id}>
+              {sections.map((section, index) =>
+                section.id === "about" ? (
+                  about
+                ) : (
+                  <section
+                    key={section.id}
+                    className={styles.section}
+                    id={section.id}
+                    data-section={section.id}
+                  >
                     <h2 className={styles.sectionTitle}>
                       <span>{String(index + 1).padStart(2, "0")}</span>
                       {sectionNames[section.id]}
@@ -387,9 +394,8 @@ export function PremiumDarkPortfolio({
                       </div>
                     )}
                   </section>
-                  {section.id === "projects" && about}
-                </Fragment>
-              ))}
+                ),
+              )}
             </div>
           </>
         )}

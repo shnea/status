@@ -72,7 +72,7 @@ export interface Certification {
 }
 
 export interface SectionSetting {
-  id: "skills" | "projects" | "history" | "certifications";
+  id: "about" | "skills" | "projects" | "history" | "certifications";
   visible: boolean;
 }
 
@@ -84,6 +84,24 @@ export interface PortfolioDocument {
   certifications: Certification[];
   sections: SectionSetting[];
   template: string;
+}
+
+export function orderedSections(document: PortfolioDocument): SectionSetting[] {
+  if (document.sections.some((section) => section.id === "about")) return document.sections;
+
+  // Older snapshots placed the introduction after visible projects, otherwise first.
+  const projectIndex = document.sections.findIndex(
+    (section) =>
+      section.id === "projects" &&
+      section.visible &&
+      document.projects.some((project) => project.visible),
+  );
+
+  return [
+    ...document.sections.slice(0, projectIndex + 1),
+    { id: "about", visible: true },
+    ...document.sections.slice(projectIndex + 1),
+  ];
 }
 
 export interface DraftView {

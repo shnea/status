@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { identity, initialDraft } from "./fixtures/workspace";
+import { swissSample } from "../src/features/templates/swiss/sample";
 
 test("public address is fixed and AI settings are absent before admin permission", async ({
   page,
@@ -156,3 +157,103 @@ test("separate banner upload and main title persist through all templates", asyn
     "/api/files/" + banner + "/content/preview",
   );
 });
+
+for (const template of ["swiss", "hud", "google-flat", "modern-flat", "premium-dark"]) {
+  test(
+    template + " author moves self introduction first, last and middle and hides it",
+    async ({ page }) => {
+      await identity(page);
+      let stored = initialDraft();
+      stored.document = structuredClone(swissSample);
+      stored.document.template = template;
+      stored.document.profile.about = {
+        format: "shnea-editor",
+        version: 3,
+        content: {
+          type: "doc",
+          content: [
+            {
+              type: "paragraph",
+              content: [{ type: "text", text: "순서를 지정하는 자기소개 본문" }],
+            },
+          ],
+        },
+      };
+      await page.route("**/api/portfolio", async (route) => {
+        if (route.request().method() === "PUT") {
+          stored = {
+            ...stored,
+            document: route.request().postDataJSON().document,
+            revision: stored.revision + 1,
+          };
+        }
+
+        await route.fulfill({ json: stored });
+      });
+      await page.goto("/dashboard");
+      await page.getByRole("button", { name: "06 설정", exact: true }).click();
+      const settings = page.getByRole("region", { name: "표시 설정" });
+      await expect(settings.locator("ol > li")).toHaveCount(5);
+
+      const saveAndPreview = async (order: string[]) => {
+        await page.getByRole("button", { name: "임시저장", exact: true }).click();
+        await expect(page.getByRole("status", { name: "저장 상태" })).toHaveText("임시저장됨");
+        expect(stored.document.sections.map((section) => section.id)).toEqual(order);
+        await page.getByRole("button", { name: "미리보기 ↗", exact: true }).click();
+        await expect(page.locator("main #about")).toHaveCount(1);
+        expect(
+          await page
+            .locator("main section[id]")
+            .evaluateAll((items) => items.map((item) => item.id)),
+        ).toEqual(order);
+        expect(
+          await page
+            .getByRole("navigation", { name: "포트폴리오 섹션" })
+            .locator("a")
+            .evaluateAll((items) => items.map((item) => item.getAttribute("href"))),
+        ).toEqual(order.map((id) => "#" + id));
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+          true,
+        );
+        await page.getByRole("link", { name: "작성 화면으로 ↗", exact: true }).click();
+        await page.getByRole("button", { name: "06 설정", exact: true }).click();
+      };
+
+      await settings.getByRole("button", { name: "자기소개 위로", exact: true }).click();
+      await saveAndPreview(["about", "projects", "skills", "history", "certifications"]);
+
+      for (let index = 0; index < 4; index++) {
+        await settings.getByRole("button", { name: "자기소개 아래로", exact: true }).click();
+      }
+
+      await saveAndPreview(["projects", "skills", "history", "certifications", "about"]);
+
+      for (let index = 0; index < 2; index++) {
+        await settings.getByRole("button", { name: "자기소개 위로", exact: true }).click();
+      }
+
+      await saveAndPreview(["projects", "skills", "about", "history", "certifications"]);
+
+      const aboutRow = settings
+        .locator("li")
+        .filter({ has: page.getByRole("heading", { name: "자기소개", exact: true }) });
+
+      await aboutRow.getByRole("checkbox", { name: "표시", exact: true }).uncheck();
+      await page.getByRole("button", { name: "임시저장", exact: true }).click();
+      await expect(page.getByRole("status", { name: "저장 상태" })).toHaveText("임시저장됨");
+      expect(stored.document.profile.about).not.toBeNull();
+      await page.getByRole("button", { name: "미리보기 ↗", exact: true }).click();
+      await expect(page.locator("main #about")).toHaveCount(0);
+      await expect(
+        page
+          .getByRole("navigation", { name: "포트폴리오 섹션" })
+          .getByRole("link", { name: "자기소개", exact: true }),
+      ).toHaveCount(0);
+      await expect(page.getByRole("main")).not.toContainText("순서를 지정하는 자기소개 본문");
+      await page.screenshot({
+        path: "/artifacts/" + template + "-about-hidden-" + test.info().project.name + ".png",
+        fullPage: true,
+      });
+    },
+  );
+}

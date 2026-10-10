@@ -14,7 +14,8 @@ class PortfolioValidation(private val jdbc: JdbcTemplate, private val catalog: S
     fun normalize(memberId: UUID, document: PortfolioDocument, previous: PortfolioDocument): PortfolioDocument {
         require(json.writeValueAsBytes(document).size <= 1024 * 1024) { "포트폴리오 내용은 1MiB 이하로 저장해주세요." }
         require(document.profile.name.length <= 100 && document.profile.title.length <= 200 && document.profile.introduction.length <= 300) { "이름·메인 타이틀 또는 한 줄 소개가 너무 깁니다." }
-        require(document.sections.map { it.id }.toSet() == setOf("skills", "projects", "history", "certifications") && document.sections.size == 4) { "섹션 설정을 확인해주세요." }
+        val normalized = document.withAboutSection()
+        require(normalized.sections.map { it.id }.toSet() == setOf("about", "skills", "projects", "history", "certifications") && normalized.sections.size == 5) { "섹션 설정을 확인해주세요." }
         require(document.skills.count { it.featured } <= 10) { "대표 스킬은 최대 10개입니다." }
         requireUnique(document.skills.map { it.id })
         requireUnique(document.projects.map { it.id })
@@ -52,7 +53,7 @@ class PortfolioValidation(private val jdbc: JdbcTemplate, private val catalog: S
         if (document.template != previous.template) {
             require(jdbc.queryForObject("SELECT count(*) FROM template_settings WHERE id = ? AND enabled AND implemented", Int::class.java, document.template) == 1) { "선택할 수 없는 템플릿입니다." }
         }
-        return document.copy(skills = skills)
+        return normalized.copy(skills = skills)
     }
 
     fun validateForPublish(document: PortfolioDocument) {

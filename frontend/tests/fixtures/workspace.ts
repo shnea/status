@@ -27,6 +27,7 @@ export function initialDraft(): DraftView {
       sections: [
         { id: "skills", visible: true },
         { id: "projects", visible: true },
+        { id: "about", visible: true },
         { id: "history", visible: true },
         { id: "certifications", visible: true },
       ],

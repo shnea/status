@@ -78,6 +78,7 @@ test("collection editing preserves order, detail content and section privacy", a
   await page.getByRole("button", { name: "06 설정", exact: true }).click();
   await page.getByRole("button", { name: "히스토리 위로" }).click();
   await page.getByRole("button", { name: "히스토리 위로" }).click();
+  await page.getByRole("button", { name: "히스토리 위로" }).click();
   await page
     .getByRole("listitem")
     .filter({ hasText: "스킬" })

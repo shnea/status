@@ -105,10 +105,12 @@ pwsh -NoProfile -File scripts/test-operations.ps1
 
 ## 적용된 운영 배포
 
-2026-10-11 적용한 릴리스는 `release-20261010T202304Z-9b6d5aa4`다. 세 앱 이미지는 `registry.shnea.kr/status-backend`, `status-frontend`, `status-pdf`에서 동일 릴리스 태그로 Pull했다. 로컬 Docker의 이미지 ID와 레지스트리의 플랫폼별 config digest 표시는 다를 수 있으므로 실제 서버 이미지 ID는 레지스트리의 AMD64 manifest config digest와 대조했다.
+2026-10-11 최초 적용한 릴리스는 `release-20261010T202304Z-9b6d5aa4`다. 세 앱 이미지는 `registry.shnea.kr/status-backend`, `status-frontend`, `status-pdf`에서 동일 릴리스 태그로 Pull했다. 로컬 Docker의 이미지 ID와 레지스트리의 플랫폼별 config digest 표시는 다를 수 있으므로 실제 서버 이미지 ID는 레지스트리의 AMD64 manifest config digest와 대조했다.
 
 다섯 운영 서비스의 상태 검사, HTTPS 홈페이지·정적 리소스·샘플 화면, 운영 OIDC realm·콜백·PKCE·보안 쿠키, 익명 사용자에게 작성/관리 API 차단, 운영 원점의 robots/sitemap을 확인했다. 운영 플랫폼의 연결 환경·파일 권한·명시적 장기 보존 정책도 확인했다.
 
 초기 DB 백업을 생성하고 네트워크 없는 임시 PostgreSQL에서 복구하여 10개 마이그레이션을 확인했다. 복구 검사는 운영 DB에 쓰지 않는다. OIDC 로그인 진입을 자동 검증했고 운영 DB에서도 회원과 계정당 한 개 포트폴리오의 생성이 확인됐다. 가입 후 지정한 슈퍼관리자 식별자를 운영 백엔드에 적용했으며 실제 활성 회원과 설정의 일치를 값 노출 없이 확인했다.
 
 서버에는 운영용 Compose·참조 infra 파일·필수 sh 스크립트·암호화 원본·수신자 정책·보호된 실행용 ENV만 배치했다. 소스·빌드 스크립트·테스트·Git·이미지 tar 파일을 서버에 두지 않는다.
+
+자기소개 순서 설정 수정은 2026-10-11에 백엔드·프런트엔드 릴리스 `release-20261010T230117Z-83734ba8`로 반영했다. PDF 작업자 이미지는 기존 릴리스를 유지한다. 이미지 교체 직전에 운영 DB 백업을 생성했고, 두 실행 이미지가 레지스트리 AMD64 설정 digest와 일치함을 확인했다. 다섯 서비스 상태, HTTPS·정적 리소스·OIDC 진입·익명 권한 차단·템플릿·SEO 검사도 통과했다. 기존 저장 자료의 위치를 유지하여 읽으며 DB 마이그레이션은 추가하지 않았다.

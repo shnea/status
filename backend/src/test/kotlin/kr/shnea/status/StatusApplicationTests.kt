@@ -536,6 +536,66 @@ class StatusApplicationTests {
             .andExpect(status().isBadRequest)
     }
     @Test
+    fun selfIntroductionCanMoveAndHideWithoutChangingThePublishedDraft() {
+        val initial = draft()
+        assertEquals(setOf("about", "skills", "projects", "history", "certifications"), initial.document.sections.map { it.id }.toSet())
+        val about = json.readTree("""{"format":"shnea-editor","version":3,"content":{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"위치를 바꾸는 자기소개"}]}]}}""")
+        val order = listOf("about", "projects", "skills", "history", "certifications")
+        val saved = save(initial, initial.document.copy(
+            profile = initial.document.profile.copy(about = about),
+            sections = order.map { SectionSetting(it) }
+        ))
+        assertEquals(order, draft().document.sections.map { it.id })
+        publish(saved)
+        mvc.perform(get("/api/public/portfolios/${saved.slug}"))
+            .andExpect(jsonPath("$.document.sections[0].id").value("about"))
+
+        val hidden = save(saved, saved.document.copy(sections = saved.document.sections.map {
+            if (it.id == "about") it.copy(visible = false) else it
+        }))
+        assertEquals(about, draft().document.profile.about)
+        mvc.perform(get("/api/public/portfolios/${saved.slug}"))
+            .andExpect(jsonPath("$.document.profile.about.content.content[0].content[0].text").value("위치를 바꾸는 자기소개"))
+        publish(hidden)
+        val result = mvc.perform(get("/api/public/portfolios/${saved.slug}")).andExpect(status().isOk).andReturn()
+        val public = json.readValue(result.response.contentAsString, PublicPortfolio::class.java)
+        assertTrue(public.document.profile.about?.isNull != false)
+        assertFalse(result.response.contentAsString.contains("위치를 바꾸는 자기소개"))
+        assertFalse(kr.shnea.status.ai.AiDocuments.from(public.document, saved.slug).any { it.content.contains("위치를 바꾸는 자기소개") })
+        assertEquals(about, draft().document.profile.about)
+
+        val restored = save(hidden, hidden.document.copy(sections = order.reversed().map { SectionSetting(it) }, template = "premium-dark"))
+        publish(restored)
+        assertEquals(order.reversed(), draft().document.sections.map { it.id })
+        mvc.perform(get("/api/public/portfolios/${saved.slug}"))
+            .andExpect(jsonPath("$.document.sections[4].id").value("about"))
+            .andExpect(jsonPath("$.document.profile.about.content.content[0].content[0].text").value("위치를 바꾸는 자기소개"))
+    }
+
+    @Test
+    fun legacySelfIntroductionKeepsItsPositionWithoutRewritingSnapshots() {
+        val initial = draft()
+        val legacy = initial.document.copy(
+            projects = listOf(Project(title = "기존 프로젝트")),
+            sections = listOf("certifications", "projects", "history", "skills").map { SectionSetting(it) }
+        )
+        val encoded = json.writeValueAsString(legacy)
+        jdbc.update("UPDATE portfolios SET draft=?::jsonb,published=?::jsonb,published_revision=0,is_public=true WHERE id=?", encoded, encoded, initial.id)
+        val expected = listOf("certifications", "projects", "about", "history", "skills")
+        assertEquals(expected, draft().document.sections.map { it.id })
+        val result = mvc.perform(get("/api/public/portfolios/${initial.slug}")).andExpect(status().isOk).andReturn()
+        assertEquals(expected, json.readValue(result.response.contentAsString, PublicPortfolio::class.java).document.sections.map { it.id })
+        assertEquals(4, jdbc.queryForObject("SELECT jsonb_array_length(draft->'sections') FROM portfolios WHERE id=?", Int::class.java, initial.id))
+        assertEquals(4, jdbc.queryForObject("SELECT jsonb_array_length(published->'sections') FROM portfolios WHERE id=?", Int::class.java, initial.id))
+        val saved = save(draft(), legacy)
+        assertEquals(expected, saved.document.sections.map { it.id })
+
+        val hiddenProjects = legacy.copy(sections = legacy.sections.map { if (it.id == "projects") it.copy(visible = false) else it })
+        jdbc.update("UPDATE portfolios SET draft=?::jsonb WHERE id=?", json.writeValueAsString(hiddenProjects), initial.id)
+        assertEquals("about", draft().document.sections.first().id)
+    }
+
+    @Test
     fun richSelfIntroductionPersistsSeparatelyInDraftAndPublishedVersions() {
         val initial = draft()
         val about = json.readTree("""{"format":"shnea-editor","version":3,"content":{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"긴 자기소개","marks":[{"type":"bold"}]}]},{"type":"bulletList","content":[{"type":"listItem","content":[{"type":"paragraph","content":[{"type":"text","text":"나의 경험"}]}]}]}]}}""")

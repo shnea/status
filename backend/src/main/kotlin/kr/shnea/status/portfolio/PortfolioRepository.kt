@@ -45,8 +45,8 @@ class PortfolioRepository(private val jdbc: JdbcTemplate, private val json: Json
         val publishedText = row.getString("published")
         return PortfolioRecord(
             row.getObject("id", UUID::class.java), row.getObject("member_id", UUID::class.java), row.getString("slug"),
-            json.readValue(row.getString("draft"), PortfolioDocument::class.java), row.getLong("draft_revision"),
-            if (publishedText == null) null else json.readValue(publishedText, PortfolioDocument::class.java),
+            json.readValue(row.getString("draft"), PortfolioDocument::class.java).withAboutSection(), row.getLong("draft_revision"),
+            if (publishedText == null) null else json.readValue(publishedText, PortfolioDocument::class.java).withAboutSection(),
             row.getObject("published_revision", Long::class.javaObjectType),
             row.getBoolean("is_public"), row.getBoolean("ai_consent"), row.getTimestamp("updated_at").toInstant()
         )

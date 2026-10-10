@@ -1,5 +1,5 @@
-import { RichContent } from "@/features/content/RichContent";
-import { contactHref, sortedSkills } from "@/features/portfolio/model";
+import { hasContent, RichContent } from "@/features/content/RichContent";
+import { contactHref, orderedSections, sortedSkills } from "@/features/portfolio/model";
 import type { PrintDocument } from "@/features/pdf/model";
 import swiss from "@/features/templates/swiss/SwissPrint.module.css";
 import hud from "@/features/templates/hud/HudPrint.module.css";
@@ -68,21 +68,37 @@ export function PortfolioPrint({
           alt=""
         />
       )}
-      <RichContent
-        content={document.profile.about}
-        fileBase={fileBase}
-        downloadBase={downloadBase}
-        className={styles.body}
-        print
-      />
-      {document.sections
+      {orderedSections(document)
         .filter((section) => section.visible)
         .map((section) => {
           switch (section.id) {
+            case "about":
+              return (
+                hasContent(document.profile.about) && (
+                  <section
+                    key={section.id}
+                    className={styles.section}
+                    data-print-section={section.id}
+                  >
+                    <h2>자기소개</h2>
+                    <RichContent
+                      content={document.profile.about}
+                      fileBase={fileBase}
+                      downloadBase={downloadBase}
+                      className={styles.body}
+                      print
+                    />
+                  </section>
+                )
+              );
             case "skills":
               return (
                 document.skills.length > 0 && (
-                  <section key={section.id} className={styles.section}>
+                  <section
+                    key={section.id}
+                    className={styles.section}
+                    data-print-section={section.id}
+                  >
                     <h2>스킬</h2>
                     <dl className={styles.skills}>
                       {[
@@ -105,7 +121,11 @@ export function PortfolioPrint({
             case "projects":
               return (
                 document.projects.length > 0 && (
-                  <section key={section.id} className={styles.section}>
+                  <section
+                    key={section.id}
+                    className={styles.section}
+                    data-print-section={section.id}
+                  >
                     <h2>프로젝트</h2>
                     {document.projects.map((project) => (
                       <article className={styles.item} key={project.id}>
@@ -157,7 +177,11 @@ export function PortfolioPrint({
             case "history":
               return (
                 document.history.length > 0 && (
-                  <section key={section.id} className={styles.section}>
+                  <section
+                    key={section.id}
+                    className={styles.section}
+                    data-print-section={section.id}
+                  >
                     <h2>히스토리</h2>
                     {document.history.map((history) => (
                       <article className={styles.item} key={history.id}>
@@ -188,7 +212,11 @@ export function PortfolioPrint({
             case "certifications":
               return (
                 document.certifications.length > 0 && (
-                  <section key={section.id} className={styles.section}>
+                  <section
+                    key={section.id}
+                    className={styles.section}
+                    data-print-section={section.id}
+                  >
                     <h2>자격 · 인증</h2>
                     {document.certifications.map((item) => (
                       <article className={styles.item} key={item.id}>

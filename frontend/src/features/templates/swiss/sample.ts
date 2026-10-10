@@ -142,6 +142,7 @@ export const swissSample: PortfolioDocument = {
   ],
   sections: [
     { id: "projects", visible: true },
+    { id: "about", visible: true },
     { id: "skills", visible: true },
     { id: "history", visible: true },
     { id: "certifications", visible: true },

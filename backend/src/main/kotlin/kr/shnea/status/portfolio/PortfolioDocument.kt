@@ -26,13 +26,23 @@ data class PortfolioDocument(
     val projects: List<Project> = emptyList(),
     val history: List<History> = emptyList(),
     val certifications: List<Certification> = emptyList(),
-    val sections: List<SectionSetting> = listOf(SectionSetting("skills"), SectionSetting("projects"), SectionSetting("history"), SectionSetting("certifications")),
+    val sections: List<SectionSetting> = listOf(SectionSetting("skills"), SectionSetting("projects"), SectionSetting("about"), SectionSetting("history"), SectionSetting("certifications")),
     val template: String = "swiss"
 ) {
+    fun withAboutSection(): PortfolioDocument {
+        if (sections.any { it.id == "about" }) return this
+        // Preserve the former placement when reading existing four-section snapshots.
+        val projectIndex = sections.indexOfFirst { it.id == "projects" && it.visible && projects.any { project -> project.visible } }
+        val ordered = sections.toMutableList()
+        ordered.add(projectIndex + 1, SectionSetting("about"))
+        return copy(sections = ordered)
+    }
+
     fun publicProjection(): PortfolioDocument {
-        val visibleSections = sections.filter { it.visible }.map { it.id }.toSet()
-        return copy(
-            profile = profile.copy(contacts = profile.contacts.filter { it.visible }, bannerImageId = if (template == "swiss") null else profile.bannerImageId),
+        val document = withAboutSection()
+        val visibleSections = document.sections.filter { it.visible }.map { it.id }.toSet()
+        return document.copy(
+            profile = profile.copy(about = if ("about" in visibleSections) profile.about else null, contacts = profile.contacts.filter { it.visible }, bannerImageId = if (template == "swiss") null else profile.bannerImageId),
             skills = if ("skills" in visibleSections) skills else emptyList(),
             projects = if ("projects" in visibleSections) projects.filter { it.visible }.map { it.copy(links = it.links.filter { link -> link.visible }) } else emptyList(),
             history = if ("history" in visibleSections) history.filter { it.visible } else emptyList(),

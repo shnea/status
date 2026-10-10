@@ -46,7 +46,7 @@ export function printFixture() {
         { id: "kotlin", name: "Kotlin", category: "언어", featured: true },
         { id: "spring", name: "Spring Boot", category: "백엔드", featured: true },
       ],
-      sections: ["skills", "projects", "history", "certifications"].map((id) => ({
+      sections: ["about", "skills", "projects", "history", "certifications"].map((id) => ({
         id,
         visible: true,
       })),
