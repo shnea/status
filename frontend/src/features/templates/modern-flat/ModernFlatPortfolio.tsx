@@ -10,127 +10,67 @@ import { BasicIcon, IconAsset } from "@/features/catalog/IconAsset";
 import { hasContent, RichContent } from "@/features/content/RichContent";
 import { useSiteSettings } from "@/features/site/SiteContext";
 import { AiChat } from "@/features/ai/AiChat";
+import { ModernProjects } from "./ModernProjects";
 import styles from "./ModernFlatPortfolio.module.css";
 
 function HeroGraphic() {
   return (
-    <svg className={styles.heroGraphic} viewBox="0 0 600 420" aria-hidden focusable="false">
-      <rect x="130" y="36" width="365" height="282" rx="8" fill="#edf3ff" />
+    <svg className={styles.heroGraphic} viewBox="0 0 640 460" aria-hidden focusable="false">
+      <rect x="386" y="26" width="208" height="272" rx="4" fill="#e9f1ff" />
+      <path d="M490 26V298M386 162H594" stroke="#fff" strokeWidth="8" />
       <rect
-        x="177"
-        y="78"
-        width="365"
-        height="250"
-        rx="8"
+        x="85"
+        y="75"
+        width="248"
+        height="178"
+        rx="12"
         fill="#fff"
-        stroke="#cedcf6"
+        stroke="#d5e3fc"
         strokeWidth="2"
       />
-      <path d="M177 116H542" stroke="#e2eaf9" strokeWidth="2" />
-      <circle cx="198" cy="96" r="4" fill="#3f76ef" />
-      <circle cx="213" cy="96" r="4" fill="#aec5f5" />
-      <circle cx="228" cy="96" r="4" fill="#d3dff5" />
-      <rect x="213" y="148" width="92" height="130" rx="5" fill="#eaf1ff" />
+      <path d="M85 108H333" stroke="#e4ecfb" strokeWidth="2" />
+      <circle cx="105" cy="92" r="4" fill="#3371ef" />
+      <circle cx="121" cy="92" r="4" fill="#b7cef8" />
+      <circle cx="137" cy="92" r="4" fill="#d8e5fc" />
       <path
-        d="M236 180L222 194L236 208M267 180L281 194L267 208M259 173L246 215"
-        stroke="#3270ea"
-        strokeWidth="4"
+        d="M114 137H202M114 158H283M114 179H246M114 200H269"
+        stroke="#b7cff8"
+        strokeWidth="7"
+        strokeLinecap="round"
+      />
+      <path d="M51 371H616" stroke="#d5dfed" strokeWidth="4" />
+      <path d="M196 198H442L463 350H176Z" fill="#8ca7d4" />
+      <path d="M205 209H431L449 338H187Z" fill="#f1f5ff" />
+      <path d="M154 350H485L461 369H180Z" fill="#bdcee8" />
+      <path d="M295 350H349L344 357H300Z" fill="#8ca7d4" />
+      <path
+        d="M301 251L282 270L301 289M339 251L358 270L339 289M330 242L309 298"
+        stroke="#3371ef"
+        strokeWidth="7"
         fill="none"
         strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path
-        d="M330 158H498M330 184H454M330 228H485M330 254H426"
-        stroke="#d8e5fc"
-        strokeWidth="9"
-        strokeLinecap="round"
+        d="M527 329V228M527 275C497 276 481 260 480 239C508 239 526 253 527 275ZM527 251C528 218 548 199 574 198C572 227 554 246 527 251Z"
+        fill="#79aa91"
+        stroke="#6c9a84"
+        strokeWidth="3"
+        strokeLinejoin="round"
       />
+      <path d="M499 325H553L546 369H506Z" fill="#cfdcf0" />
       <rect
-        x="70"
-        y="248"
-        width="213"
-        height="127"
+        x="92"
+        y="312"
+        width="54"
+        height="53"
         rx="8"
         fill="#fff"
-        stroke="#bccff2"
+        stroke="#d5e3fc"
         strokeWidth="2"
       />
-      <path
-        d="M100 286H186M100 311H245M100 336H219"
-        stroke="#a9c7fa"
-        strokeWidth="8"
-        strokeLinecap="round"
-      />
-      <path d="M48 386H566" stroke="#d1dced" strokeWidth="2" />
-      <rect x="433" y="347" width="78" height="28" rx="3" fill="#2d69dd" />
-      <rect x="420" y="376" width="94" height="10" rx="2" fill="#b9cef6" />
-    </svg>
-  );
-}
-
-function ProjectGraphic({ index }: { index: number }) {
-  return (
-    <svg className={styles.cover} viewBox="0 0 400 260" aria-hidden focusable="false">
-      <rect width="400" height="260" rx="14" fill={["#edf4ff", "#e9f6ef", "#fff6e5"][index % 3]} />
-      {index % 3 === 0 ? (
-        <>
-          <rect
-            x="62"
-            y="51"
-            width="276"
-            height="159"
-            rx="12"
-            fill="#fff"
-            stroke="#c6dcff"
-            strokeWidth="2"
-          />
-          <path d="M62 84H338" stroke="#e2edff" />
-          <circle cx="83" cy="68" r="4" fill="#70a3f6" />
-          <rect x="85" y="106" width="76" height="78" rx="6" fill="#e5efff" />
-          <path
-            d="M174 119H310M174 140H281M174 164H295"
-            stroke="#bfd5f7"
-            strokeWidth="8"
-            strokeLinecap="round"
-          />
-        </>
-      ) : index % 3 === 1 ? (
-        <>
-          <circle cx="200" cy="130" r="88" fill="#d7efdf" />
-          <path
-            d="M200 58L251 80V137C251 173 224 193 200 207C176 193 149 173 149 137V80Z"
-            fill="#67ae87"
-          />
-          <path
-            d="M176 130L193 149L227 111"
-            fill="none"
-            stroke="#fff"
-            strokeWidth="9"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </>
-      ) : (
-        <>
-          <rect
-            x="76"
-            y="54"
-            width="222"
-            height="154"
-            rx="12"
-            fill="#fff"
-            stroke="#eadfc6"
-            strokeWidth="2"
-          />
-          <path
-            d="M102 86H225M102 115H199M102 144H242M102 173H167"
-            stroke="#d4deef"
-            strokeWidth="8"
-            strokeLinecap="round"
-          />
-          <circle cx="286" cy="137" r="39" fill="#f7fbff" stroke="#6c9ce9" strokeWidth="8" />
-          <path d="M314 166L342 194" stroke="#6c9ce9" strokeWidth="12" strokeLinecap="round" />
-        </>
-      )}
+      <path d="M146 323H158V347H146" fill="none" stroke="#d5e3fc" strokeWidth="5" />
+      <path d="M111 304V289M125 304V283" stroke="#c2d5f5" strokeWidth="3" strokeLinecap="round" />
     </svg>
   );
 }
@@ -256,19 +196,27 @@ export function ModernFlatPortfolio({
         자기소개
       </h2>
       <div className={styles.about}>
-        {document.profile.imageId && (
-          <img
-            className={styles.portrait}
-            src={fileBase + document.profile.imageId + "/content/preview"}
-            alt={document.profile.name}
-          />
-        )}
-        <RichContent content={document.profile.about} fileBase={fileBase} className={styles.body} />
-        {document.profile.contacts.some((link) => link.visible && link.value) && (
-          <aside className={styles.contactPanel}>
-            <Links links={document.profile.contacts} />
-          </aside>
-        )}
+        <aside className={styles.profileCard} aria-label="프로필">
+          {document.profile.imageId && (
+            <img
+              className={styles.portrait}
+              src={fileBase + document.profile.imageId + "/content/preview"}
+              alt={document.profile.name}
+            />
+          )}
+          <div className={styles.profileIdentity}>
+            <p className={styles.profileName}>{document.profile.name}</p>
+            {document.profile.introduction && (
+              <p className={styles.profileRole}>{document.profile.introduction}</p>
+            )}
+          </div>
+          <Links links={document.profile.contacts} />
+        </aside>
+        <RichContent
+          content={document.profile.about}
+          fileBase={fileBase}
+          className={styles.body + " " + styles.aboutBody}
+        />
       </div>
     </section>
   );
@@ -353,59 +301,35 @@ export function ModernFlatPortfolio({
               </div>
             </section>
 
-            {sections.map((section) =>
-              section.id === "about" ? (
-                about
-              ) : (
+            {sections.map((section) => {
+              if (section.id === "about") return about;
+
+              if (section.id === "projects") {
+                return (
+                  <ModernProjects
+                    key={section.id}
+                    projects={document.projects.filter((project) => project.visible)}
+                    skills={document.skills}
+                    fileBase={fileBase}
+                    slug={slug}
+                    open={open}
+                  />
+                );
+              }
+
+              return (
                 <section
                   key={section.id}
                   className={styles.section}
                   id={section.id}
                   data-section={section.id}
+                  aria-labelledby={section.id + "-heading"}
                 >
-                  <h2 className={styles.sectionTitle}>{sectionNames[section.id]}</h2>
+                  <h2 className={styles.sectionTitle} id={section.id + "-heading"}>
+                    {sectionNames[section.id]}
+                  </h2>
                   <div className={styles.sectionContent}>
                     {section.id === "skills" && <Skills skills={document.skills} />}
-                    {section.id === "projects" && (
-                      <div className={styles.projects}>
-                        {document.projects
-                          .filter((project) => project.visible)
-                          .map((project, projectIndex) => (
-                            <article key={project.id} className={styles.project}>
-                              <a
-                                className={styles.projectLink}
-                                href={"/@" + slug + "/projects/" + project.id}
-                                onClick={(event) => open(event, project)}
-                              >
-                                <div className={styles.coverFrame}>
-                                  {project.imageId ? (
-                                    <img
-                                      className={styles.cover}
-                                      src={fileBase + project.imageId + "/content/preview"}
-                                      alt=""
-                                      loading="lazy"
-                                    />
-                                  ) : (
-                                    <ProjectGraphic index={projectIndex} />
-                                  )}
-                                </div>
-                                <h3>{project.title} ↗</h3>
-                                {project.summary && (
-                                  <p className={styles.summary}>{project.summary}</p>
-                                )}
-                              </a>
-                              <div className={styles.projectSkills}>
-                                {document.skills
-                                  .filter((skill) => project.skillIds.includes(skill.id))
-                                  .map((skill) => (
-                                    <span key={skill.id}>{skill.name}</span>
-                                  ))}
-                              </div>
-                              <Links links={project.links} />
-                            </article>
-                          ))}
-                      </div>
-                    )}
                     {section.id === "history" && (
                       <div className={styles.timeline}>
                         {document.history
@@ -475,8 +399,8 @@ export function ModernFlatPortfolio({
                     )}
                   </div>
                 </section>
-              ),
-            )}
+              );
+            })}
           </>
         )}
         {aiEnabled && !preview && (

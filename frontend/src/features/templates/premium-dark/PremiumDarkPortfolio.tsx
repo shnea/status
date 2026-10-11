@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { JSONContent } from "@tiptap/core";
 import type { Contact, Project, Skill } from "@/features/portfolio/model";
 import { contactHref, initials, sortedSkills } from "@/features/portfolio/model";
 import type { TemplateProps } from "@/features/templates/model";
@@ -11,6 +12,16 @@ import { hasContent, RichContent } from "@/features/content/RichContent";
 import { useSiteSettings } from "@/features/site/SiteContext";
 import { AiChat } from "@/features/ai/AiChat";
 import styles from "./PremiumDarkPortfolio.module.css";
+
+function textLength(node: JSONContent): number {
+  let length = node.text?.length || 0;
+
+  for (const child of node.content || []) {
+    length += textLength(child);
+  }
+
+  return length;
+}
 
 function HeroGraphic() {
   return (
@@ -165,8 +176,63 @@ export function PremiumDarkPortfolio({
   const excerpt = hasAbout ? profileExcerpt(document.profile.about) : "";
   const fileBase = preview ? "/api/files/" : "/api/public/files/" + portfolioId + "/";
 
+  const compact = sections.map((section) => {
+    switch (section.id) {
+      case "about": {
+        const content = document.profile.about?.content;
+        const blocks = content?.content || [];
+
+        return Boolean(
+          content &&
+          blocks.length <= 3 &&
+          blocks.every((block) => block.type === "paragraph") &&
+          textLength(content) <= 380 &&
+          document.profile.contacts.filter((link) => link.visible && link.value).length <= 4,
+        );
+      }
+
+      case "skills":
+        return document.skills.length <= 12;
+      case "history": {
+        const entries = document.history.filter((item) => item.visible);
+
+        return (
+          entries.length <= 3 &&
+          entries.every(
+            (item) =>
+              item.summary.length <= 160 &&
+              item.title.length <= 80 &&
+              item.organization.length + item.role.length <= 100,
+          )
+        );
+      }
+
+      case "certifications":
+        return document.certifications.filter((item) => item.visible).length <= 2;
+      case "projects":
+        return false;
+    }
+  });
+
+  const paired = new Set<string>();
+
+  // Pair only adjacent compact sections: no reordering or stranded half-width panels.
+  for (let index = 0; index < sections.length - 1; index++) {
+    if (compact[index] && compact[index + 1]) {
+      paired.add(sections[index].id);
+      paired.add(sections[index + 1].id);
+      index++;
+    }
+  }
+
   const about = hasAbout && (
-    <section className={styles.aboutSection} key="about" id="about" aria-labelledby="about-heading">
+    <section
+      className={styles.aboutSection}
+      key="about"
+      id="about"
+      aria-labelledby="about-heading"
+      data-layout={paired.has("about") ? "paired" : "full"}
+    >
       <h2 className={styles.sectionTitle} id="about-heading">
         <span aria-hidden>
           {String(sections.findIndex((section) => section.id === "about") + 1).padStart(2, "0")}
@@ -174,13 +240,19 @@ export function PremiumDarkPortfolio({
         자기소개
       </h2>
       <div className={styles.about}>
-        {document.profile.imageId && (
-          <img
-            className={styles.portrait}
-            src={fileBase + document.profile.imageId + "/content/preview"}
-            alt={document.profile.name}
-          />
-        )}
+        <div className={styles.aboutProfile}>
+          {document.profile.imageId && (
+            <img
+              className={styles.portrait}
+              src={fileBase + document.profile.imageId + "/content/preview"}
+              alt={document.profile.name}
+            />
+          )}
+          <p className={styles.profileName}>{document.profile.name}</p>
+          {document.profile.introduction && (
+            <p className={styles.profileRole}>{document.profile.introduction}</p>
+          )}
+        </div>
         <RichContent content={document.profile.about} fileBase={fileBase} className={styles.body} />
         {document.profile.contacts.some((link) => link.visible && link.value) && (
           <aside className={styles.contactPanel}>
@@ -280,9 +352,11 @@ export function PremiumDarkPortfolio({
                     className={styles.section}
                     id={section.id}
                     data-section={section.id}
+                    data-layout={paired.has(section.id) ? "paired" : "full"}
+                    aria-labelledby={section.id + "-heading"}
                   >
-                    <h2 className={styles.sectionTitle}>
-                      <span>{String(index + 1).padStart(2, "0")}</span>
+                    <h2 className={styles.sectionTitle} id={section.id + "-heading"}>
+                      <span aria-hidden>{String(index + 1).padStart(2, "0")}</span>
                       {sectionNames[section.id]}
                     </h2>
                     {section.id === "skills" && <Skills skills={document.skills} />}
@@ -309,7 +383,12 @@ export function PremiumDarkPortfolio({
                                     <ProjectGraphic index={projectIndex} />
                                   )}
                                 </div>
-                                <h3>{project.title} ↗</h3>
+                                <div className={styles.projectHeading}>
+                                  <h3>{project.title}</h3>
+                                  <span className={styles.projectArrow} aria-hidden>
+                                    ↗
+                                  </span>
+                                </div>
                                 {project.summary && (
                                   <p className={styles.summary}>{project.summary}</p>
                                 )}
