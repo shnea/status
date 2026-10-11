@@ -77,6 +77,13 @@ docker compose --env-file .env.local exec -e RUN_PLATFORM_FILE_TEST=true -T back
 외부 Nginx는 앱 호스트 포트로 연결하고 원래 Host와 HTTPS 프로토콜을 전달한다. 콜백·로그아웃 주소는 플랫폼 등록값과 일치해야 한다. Next.js 개발 리소스는 `APP_PUBLIC_URL`의 호스트를 [allowedDevOrigins](https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins)로 허용한다.
 
 Windows 바인드 마운트에서 새 파일이 바로 감지되지 않으면 프런트엔드를 재시작한다. 내부 Nginx는 Docker DNS를 주기적으로 다시 조회하므로 앱 컨테이너의 주소 변경에 별도 재시작 없이 대응한다. 격리된 주소 교체 검사는 `scripts/test-proxy-dns.ps1`로 실행한다.
+공개 첨부의 GET/HEAD(`views`, `content`, `hls`)와 사이트 공유 이미지 GET/HEAD는 Nginx에서 Cookie를 전달하지 않는다. 이 요청은 현재 공개본·파일 소유권·숨김·이용정지를 백엔드에서 검사하며 로그인 상태에 의존하지 않는다. 로그인·작성·AI 대화·방문 통계 등 나머지 요청은 기존 세션과 CSRF 처리를 유지한다. 세션 쿠키가 있는 공개 방문에서도 이미지 요청들이 같은 DB 세션 갱신을 기다리지 않도록 한 설정이다.
+
+공개 파일의 쿠키 분리, 로그인 경로의 쿠키 유지, CSRF 헤더·Range·no-store 응답 검사는 실제 Nginx와 가상 HTTP 서버를 쓰는 격리 Docker 검사로 확인한다. 실제 ENV·계정·파일 서비스는 사용하지 않는다.
+
+```powershell
+pwsh -NoProfile -File scripts/test-public-file-proxy.ps1
+```
 
 ```powershell
 docker compose --env-file .env.local restart frontend
