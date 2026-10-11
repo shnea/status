@@ -10,34 +10,8 @@ import { BasicIcon, IconAsset } from "@/features/catalog/IconAsset";
 import { hasContent, RichContent } from "@/features/content/RichContent";
 import { useSiteSettings } from "@/features/site/SiteContext";
 import { AiChat } from "@/features/ai/AiChat";
+import { HudScene } from "./HudScene";
 import styles from "./HudPortfolio.module.css";
-
-function OrbitGraphic() {
-  return (
-    <svg className={styles.orbit} viewBox="0 0 600 440" aria-hidden focusable="false">
-      <defs>
-        <radialGradient id="hud-sphere" cx="30%" cy="24%" r="75%">
-          <stop stopColor="#204755" />
-          <stop offset="0.6" stopColor="#0d2530" />
-          <stop offset="1" stopColor="#071119" />
-        </radialGradient>
-      </defs>
-      <circle cx="330" cy="242" r="186" fill="url(#hud-sphere)" stroke="#416774" />
-      <g fill="none" stroke="#48717e" strokeWidth="0.8" opacity="0.6">
-        <ellipse cx="330" cy="242" rx="186" ry="64" transform="rotate(-24 330 242)" />
-        <ellipse cx="330" cy="242" rx="84" ry="186" transform="rotate(28 330 242)" />
-        <ellipse cx="330" cy="242" rx="142" ry="186" transform="rotate(28 330 242)" />
-        <circle cx="330" cy="242" r="218" strokeDasharray="290 190 100 230" />
-        <path d="M66 242H584M330 14V436M128 80L545 383" />
-      </g>
-      <g fill="#93dce8">
-        <circle cx="224" cy="83" r="3" />
-        <circle cx="516" cy="242" r="3" />
-        <path d="M74 354h12m-6-6v12M524 52h12m-6-6v12" stroke="#93dce8" />
-      </g>
-    </svg>
-  );
-}
 
 function ProjectGraphic({ index }: { index: number }) {
   return (
@@ -196,11 +170,13 @@ export function HudPortfolio({
       </h2>
       <div className={styles.about}>
         {document.profile.imageId && (
-          <img
-            className={styles.portrait}
-            src={fileBase + document.profile.imageId + "/content/preview"}
-            alt={document.profile.name}
-          />
+          <div className={styles.portraitFrame}>
+            <img
+              className={styles.portrait}
+              src={fileBase + document.profile.imageId + "/content/preview"}
+              alt={document.profile.name}
+            />
+          </div>
         )}
         <RichContent content={document.profile.about} fileBase={fileBase} className={styles.body} />
         {document.profile.contacts.some((link) => link.visible && link.value) && (
@@ -260,6 +236,30 @@ export function HudPortfolio({
         ) : (
           <>
             <section className={styles.hero}>
+              <div className={styles.heroArt}>
+                <HudScene
+                  showGlobe={
+                    !document.profile.bannerImageId && (hasAbout || !document.profile.imageId)
+                  }
+                />
+                {document.profile.bannerImageId ? (
+                  <div className={styles.heroMedia}>
+                    <img
+                      className={styles.heroBanner}
+                      src={fileBase + document.profile.bannerImageId + "/content/preview"}
+                      alt={document.profile.name + " 간판 이미지"}
+                    />
+                  </div>
+                ) : !hasAbout && document.profile.imageId ? (
+                  <div className={styles.heroMedia}>
+                    <img
+                      className={styles.heroPortrait}
+                      src={fileBase + document.profile.imageId + "/content/preview"}
+                      alt={document.profile.name}
+                    />
+                  </div>
+                ) : null}
+              </div>
               <div className={styles.heroText}>
                 <h1>{document.profile.title || document.profile.name || "이름"}</h1>
                 {document.profile.introduction && (
@@ -269,25 +269,11 @@ export function HudPortfolio({
                 <Links links={document.profile.contacts} />
                 {sections[0] && (
                   <a className={styles.scroll} href={"#" + sections[0].id}>
-                    ↓ {sectionNames[sections[0].id]}
+                    <span className={styles.scrollIcon} aria-hidden>
+                      ↓
+                    </span>
+                    {sectionNames[sections[0].id]}
                   </a>
-                )}
-              </div>
-              <div className={styles.heroArt}>
-                {document.profile.bannerImageId ? (
-                  <img
-                    className={styles.heroBanner}
-                    src={fileBase + document.profile.bannerImageId + "/content/preview"}
-                    alt={document.profile.name + " 간판 이미지"}
-                  />
-                ) : !hasAbout && document.profile.imageId ? (
-                  <img
-                    className={styles.heroPortrait}
-                    src={fileBase + document.profile.imageId + "/content/preview"}
-                    alt={document.profile.name}
-                  />
-                ) : (
-                  <OrbitGraphic />
                 )}
               </div>
             </section>
@@ -298,7 +284,7 @@ export function HudPortfolio({
               ) : (
                 <section key={section.id} className={styles.section} id={section.id}>
                   <h2 className={styles.sectionTitle}>
-                    <span>{String(index + 1).padStart(2, "0")}</span>
+                    <span aria-hidden>{String(index + 1).padStart(2, "0")}</span>
                     {sectionNames[section.id]}
                   </h2>
                   {section.id === "skills" && <Skills skills={document.skills} />}
@@ -308,6 +294,9 @@ export function HudPortfolio({
                         .filter((project) => project.visible)
                         .map((project, projectIndex) => (
                           <article key={project.id} className={styles.project}>
+                            <span className={styles.projectIndex} aria-hidden>
+                              {String(projectIndex + 1).padStart(2, "0")}
+                            </span>
                             <a
                               className={styles.projectLink}
                               href={"/@" + slug + "/projects/" + project.id}
