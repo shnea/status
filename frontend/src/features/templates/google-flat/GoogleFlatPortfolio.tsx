@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Contact, Project, Skill } from "@/features/portfolio/model";
-import { contactHref, initials, sortedSkills } from "@/features/portfolio/model";
+import { contactHref, sortedSkills } from "@/features/portfolio/model";
 import type { TemplateProps } from "@/features/templates/model";
 import { portfolioSections, profileExcerpt, sectionNames } from "@/features/templates/model";
 import { useProjectNavigation } from "@/features/templates/useProjectNavigation";
@@ -292,13 +292,9 @@ export function GoogleFlatPortfolio({
           <a
             className={styles.brand}
             href={sample ? "/design-preview" : preview ? "/dashboard" : "/@" + slug}
+            title={sample ? "템플릿 목록으로" : preview ? "작성 화면으로" : undefined}
           >
-            <span aria-hidden>{initials(document.profile.name)}</span>
-            {sample
-              ? "템플릿 목록으로 ↗"
-              : preview
-                ? "작성 화면으로 ↗"
-                : document.profile.name || "포트폴리오"}
+            {document.profile.name || "포트폴리오"}
           </a>
           {!initialProject && (
             <nav aria-label="포트폴리오 섹션" className={styles.nav}>

@@ -26,19 +26,12 @@
   padding-bottom: 24px;
 }
 .brand {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  font-size: 14px;
-  font-weight: 650;
-  min-width: 0;
-}
-.brand > span {
   color: var(--accent);
   font-size: 28px;
   font-weight: 800;
   font-style: italic;
   letter-spacing: -0.06em;
+  min-width: 0;
 }
 .nav {
   display: flex;

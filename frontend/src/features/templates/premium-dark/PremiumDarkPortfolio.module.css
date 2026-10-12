@@ -26,16 +26,10 @@
   padding: 0 12px 24px;
 }
 .brand {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  font-size: 13px;
-  min-width: 0;
-}
-.brand > span {
   font-size: 26px;
   font-weight: 750;
   letter-spacing: -0.06em;
+  min-width: 0;
 }
 .nav {
   display: flex;

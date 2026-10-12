@@ -215,7 +215,7 @@ for (const template of ["swiss", "hud", "google-flat", "modern-flat", "premium-d
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
           true,
         );
-        await page.getByRole("link", { name: "작성 화면으로 ↗", exact: true }).click();
+        await page.locator('header a[href="/dashboard"]').click();
         await page.getByRole("button", { name: "06 설정", exact: true }).click();
       };
 
